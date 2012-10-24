@@ -1,0 +1,9 @@
+// Psudocode for PID controller
+// A PID is a control system with error feedback because the PID controller acts on the error which is the difference between the reference and the output.
+
+// Set point 
+	This is what we want the controller to be, the desired value.  THE GOAL!
+	-- Why is the setpoint always set to 0 when init, then it is never changed, the set point 
+	-- seems to be adjusting the entire time, should it not be constant?
+
+	
