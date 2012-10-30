@@ -27,9 +27,9 @@ rollPID_ailerons = PID(3.0,0.04,0)
 #PID responible for vertical speed
 PID_VerticalSpeed = PID(3.0,0.04,0)
 #PID responsible for controlling the pitch
-PID_pitch = PID(0.38,0.0,0.0)
+PID_pitch = PID(.15,1,0.0, 0, 0, 1, -1)
 #PID responsible for controlling the altitude
-PID_AltHold = PID(1.5,0.02,0.0)
+PID_AltHold = PID(0.5,0.02,0.0)
 PID_Heading = PID(0.1,0.0,0.0)
 #holds the past altitude
 pastAlt = 2000
@@ -52,7 +52,7 @@ def setup_plane():
   global setHeading 
   setHeading = 40
   
-  PID_AltHold.setPoint(200.00)
+  PID_AltHold.setPoint(15.00)
   rollPID_ailerons.setPoint(0)
   PID_VerticalSpeed.setPoint(-5)
   ##PID_pitch.setPoint(0)
@@ -165,7 +165,7 @@ def rateofclimb(alt):
 def altitudeHold(alt):
   global PID_AltHold
   global PID_VerticalSpeed
-  goalAlt = 1000
+  goalAlt = 2000
   adjAlt = goalAlt - alt
   pidAlt = PID_AltHold.update(adjAlt)
   

@@ -45,10 +45,10 @@ class PID:
 
 		self.Integrator = self.Integrator + self.error
 
-		if self.Integrator > self.Integrator_max:
-			self.Integrator = self.Integrator_max
-		elif self.Integrator < self.Integrator_min:
-			self.Integrator = self.Integrator_min
+		# if self.Integrator > self.Integrator_max:
+		#             self.Integrator = self.Integrator_max
+		#         elif self.Integrator < self.Integrator_min:
+		#             self.Integrator = self.Integrator_min
 
 		self.I_value = self.Integrator * self.Ki
 
@@ -81,12 +81,12 @@ class PID:
 
 	def getPoint(self):
 		return self.set_point
-
-		return self.error
-	def getError(self):
-
+    
+    	def getError(self):
+        	return self.error
+    
 	def getIntegrator(self):
-		return self.Integrator
+	    return self.Integrator
 
 	def getDerivator(self):
 		return self.Derivator

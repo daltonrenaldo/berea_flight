@@ -1,7 +1,12 @@
+require 'pid'
 require 'socket.so'
+
 
 HOST_IP = "127.0.0.1"
 PORT = 5000;
+#PID responsible for controlling the pitch
+
+
 
 class UDPClient
   attr_accessor :host, :port, :socket
@@ -18,20 +23,22 @@ class ControlPanel
   
   def initialize
     socket_create()
+    @pid_pitch = PID.new(0.15,1,0.0, 0, 0, 1, -1)
   end
   
   def update(args)
     @heading = args[0]
     @latitude_deg = args[1]
     @longitude_deg = args[2]
-    @roll_deg = args[3]
-    @pitch_deg = args[4]
-    @heading_deg = args[5]
-    @airspeed_kt = args[6]
-    @aileron = args[7]
-    @elevator = args[8]
-    @rudder = args[9]
-    @throttle = args[9]
+    @altitude_ft = args[3]
+    @roll_deg = args[4]
+    @pitch_deg = args[5]
+    @heading_deg = args[6]
+    @airspeed_kt = args[7]
+    @aileron = args[8]
+    @elevator = args[9]
+    @rudder = args[10]
+    @throttle = args[11]
   end
   
   def socket_create
@@ -43,16 +50,33 @@ class ControlPanel
       package = @client.socket.recvfrom(1024)
       array = package.to_s.split(',')
       update(array)
+      puts get_pitch(2000)
+      
+      @pid_pitch.setpoint(get_pitch(2000))
   end
   
-end
+  def get_pitch(desire_alt)
+    pitch = (desire_alt - @altitude_ft.to_f) / @altitude_ft.to_f
+    if pitch >=0
+      if pitch > 3 #max pitch
+        pitch = 3
+      end
+    else
+      if pitch < -3 #min pitch
+        pitch = -3
+      end
+    end
+    pitch
+  end
+    
+end # end of ControlPanel
 
 
 def main
   control = ControlPanel.new
   while true
     control.start
-    puts control.inspect
+    #puts control.inspect
   end
 
 end

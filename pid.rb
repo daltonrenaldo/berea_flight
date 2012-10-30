@@ -1,96 +1,90 @@
 #rewrite of the python PID to a ruby PID
 
-class PID:
-	"""
-	Discrete PID control
-	"""
+class PID
 
-	def initialize( P = 2.0, I = 0.0, D = 1.0, Derivator = 0, Integrator = 0, Integrator_max = 5, Integrator_min = -5):
-
-        #what does Kp, Ki, Kd mean here?
-		@Kp = P
-		@Ki = I
-		@Kd = D
-		@Derivator = Derivator
-		@Integrator = Integrator
-		@Integrator_max = Integrator_max
-		@Integrator_min = Integrator_min
+	def initialize( p = 2.0, i = 0.0, d = 1.0, derivator = 0, integrator = 0, integrator_max = 5, integrator_min = -5)
+    #what does Kp, Ki, Kd mean here?
+		@Kp = p
+		@Ki = i
+		@Kd = d
+		@Derivator = derivator
+		@Integrator = integrator
+		@Integrator_max = integrator_max
+		@Integrator_min = integrator_min
 
 		@set_point = 0.0
 		@error = 0.0
   end
   
 
-	def update(current_value):
-		"""
-		Calculate PID output value for given reference input and feedback
-		"""
+  def update(current_value)
+  
+    #Calculate PID output value for given reference input and feedback
+  
 
-		@error  =  @set_point - current_value
+    @error  =  @set_point - current_value
 
-		@P_value  =  @Kp * @error
-		@D_value  =  @Kd * ( @error - @Derivator)
-		@Derivator  =  @error
+    @P_value  =  @Kp * @error
+    @D_value  =  @Kd * ( @error - @Derivator)
+    @Derivator  =  @error
 
-		@Integrator  =  @Integrator + @error
+    @Integrator  =  @Integrator + @error
 
-		if @Integrator > @Integrator_max:
-			@Integrator  =  @Integrator_max
-		elif @Integrator < @Integrator_min:
-			@Integrator  =  @Integrator_min
+    if @Integrator > @Integrator_max
+      @Integrator  =  @Integrator_max
+    elsif @Integrator < @Integrator_min
+      @Integrator  =  @Integrator_min
+    end
+    @I_value  =  @Integrator * @Ki
 
-		@I_value  =  @Integrator * @Ki
+    pid  =  @P_value + @I_value + @D_value
 
-		PID  =  @P_value + @I_value + @D_value
-
-		return PID
+    return pid
   end
   
   
-	def setPoint(set_point):
-		"""
-		Initilize the setpoint of PID
-		"""
-		@set_point  =  set_point
-		@Integrator = 0
-		@Derivator = 0
+  def setpoint(set_point)
+    
+    # Initilize the setpoint of PID
+    
+    @set_point  =  set_point
+    @Integrator = 0
+    @Derivator = 0
   end
   
-	def setIntegrator( Integrator):
-		@Integrator  =  Integrator
+  def setIntegrator( integrator)
+    @Integrator  =  integrator
   end
   
-	def setDerivator( Derivator):
-		@Derivator  =  Derivator
+  def setDerivator( derivator)
+    @Derivator  =  derivator
   end
   
-	def setKp(P):
-		@Kp = P
+  def setKp(p)
+    @Kp = p
   end
   
-	def setKi(I):
-		@Ki = I
+  def setKi(i)
+    @Ki = i
   end
   
-	def setKd(D):
-		@Kd = D
+  def setKd(d)
+    @Kd = d
   end
   
-	def getPoint(self):
-		return @set_point
+  def getPoint
+    return @set_point
   end
   
-	def getError(self):
-		return @error
+  def getError
+    return @error
   end
   
-	def getIntegrator(self):
-		return @Integrator
+  def getIntegrator
+    return @Integrator
   end
   
-	def getDerivator(self):
-		return @Derivator
+  def getDerivator
+    return @Derivator
   end
-
-
 end
