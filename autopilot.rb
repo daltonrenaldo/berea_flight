@@ -67,9 +67,9 @@ class ControlPanel
     # # # # # # #
     
     # Aileron, Elevator, Rudder, and Throttle
-    control = {:aileron => 0, :elevator => 0, :rudder => 0, :throttle => 1}
+    control = {:aileron => 0, :elevator => 0, :rudder => 0, :throttle => 2}
     control[:elevator] = @elevator
-    control[:throttle] = 1.0   # always fly at full throttle
+    control[:throttle] = 2.0   # always fly at full throttle
     #do stuff and change how the plane flies, Handle roll, get current roll rate.
     
     #divide the roll by 180 to get into aileron control range
@@ -80,7 +80,7 @@ class ControlPanel
     # to use to control the aircraft.
     
     control[:aileron] = (@rollpid_ailerons.update(scaled_roll))
-    control[:elevator] = (get_pitch(2000))
+    control[:elevator] = (get_pitch(500))
     
     # We dont need that altitude hold renaldo thinks. 
     control[:rudder] = heading()
@@ -106,15 +106,18 @@ class ControlPanel
   def get_pitch(desire_alt)
     pitch = (desire_alt - @altitude_ft) / @altitude_ft
     if pitch >=0
-      if pitch > 3 #max pitch
-        pitch = 3
+      if pitch > 0.55 #max pitch
+        pitch = 0.55
+      elsif pitch == 0
+        pitch = 0
       end
     else
-      if pitch < -3 #min pitch
-        pitch = -3
+      
+      if pitch < -0.05 #min pitch
+        pitch = -0.05
       end
     end
-    pitch
+    -pitch
   end
     
 end # end of ControlPanel
