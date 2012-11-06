@@ -117,6 +117,7 @@ class ControlPanel
       
       if pitch < -0.4 #min pitch
         pitch = -0.4
+        @throttle = 0.2
       end
     end
     -pitch
