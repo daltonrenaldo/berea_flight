@@ -81,6 +81,8 @@ class ControlPanel
     
     control[:aileron] = (@rollpid_ailerons.update(scaled_roll))
     control[:elevator] = (get_pitch(500))
+    set_speed(control[:elevator])
+    control[:throttle] = @throttle
     
     # We dont need that altitude hold renaldo thinks. 
     control[:rudder] = heading()
@@ -113,13 +115,21 @@ class ControlPanel
       end
     else
       
-      if pitch < -0.05 #min pitch
-        pitch = -0.05
+      if pitch < -0.4 #min pitch
+        pitch = -0.4
       end
     end
     -pitch
   end
     
+  def set_speed(pitch)
+    if (pitch <= 0 ) # plane is going up
+      @throttle = 1
+    else 
+      # we have to decrease the speed since we are decending 
+      @throttle = @throttle - (pitch*.3);  # this constant will be a value obtained via test
+  end # end of set_speed
+
 end # end of ControlPanel
 
 
