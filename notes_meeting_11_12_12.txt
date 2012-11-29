@@ -1,0 +1,97 @@
+// Notes for program updates:
+
+1) We need to fix our Pitch PID controller
+2) Integrate something for our speed
+
+pitch_trim see line 107 in System.pde and 144 in ArduPilot.pde)
+To obtain #1
+--------------
+
+our pitch values are between -1 and 1, but we can't use those maximums, we must constrain them.
+
+pitch set point in arduipiolot is as follows: 
+	takes the error_altitude* CONSTANT
+	and compares it to the max and min for the pitch.  In our case, a value between -1 and 1.
+	
+THEIR PID_PITCH
+	2 Parameters 
+		* PID_ERROR which returns the difference between two parameters.
+			> (set_point(#from above#)+ absolute value of the roll * PITCH_COMP CONSTANT)
+			> pitch_trim (#pitch w/o decimals)+ current_pitch)
+		*t_dt
+			> the time between start and the pid_timer.
+			
+The controller is pretty much a static PID 
+Parts of Note: 
+    pitch_output= (float)((float)kp[1]*(float)PID_error);//Adding proportional
+
+    pitch_Integrator+= (float)(((float)PID_error*((float)dt/1000.0))*(float)ki[1]); 
+    pitch_Integrator=constrain(pitch_Integrator,pitch_Integrator_min,pitch_Integrator_max);
+    pitch_Integrator=reset(pitch_Integrator);
+    pitch_output+=pitch_Integrator;
+
+    pitch_output = constrain(pitch_output,pitch_min,pitch_max); //PID_P+PID_D
+
+--------------------------------------------------------------------------------------------------------------
+
+
+Our Flaws: 
+
+	Currently our Pitch PID is not using the constraints to properly set which is what is causing our plane to stall when changing altitudes.  We have come to the realization that our PID is returning the value that is similar to the contrain value mentioned in the psudocode above.  If we send the values that we are currenlty obtaining to a PID, we might be able to achive our desired outcome.
+	
+	
+Throttle is set in a similar manner.
+Throttle is set independently of the Pitch.  It has parameters of what air speed to hold, the current air speed, and again the time.
+
+air_speed to hold is found as follows: 
+	air_speed_hold=constrain(AIRSPEED_CENTRAL+(alt_error*ALTITUDE_ERROR_AIRSPEED_PROPORTIONAL),ALTITUDE_ERROR_AIRSPEED_MIN,ALTITUDE_ERROR_AIRSPEED_MAX);
+	
+
+The biggest difference between our approach and the approach of the Ardui Piolot is the use of a timing method.  We need to figure out how to implement this into our Ruby scripts.
+
+Once we cal the Pitch PID and the throttle PID, we can send these commands to the plane and it should fly as desired.... hopefully.
+
+
+
+
+
+VARIABLE DECLARE!!!!!!
+
+Notes on ArduPiolot.
+
+VARIABLES of IMPORTANCE:
+
+#### PITCH #####
+pitch_P .65 //Pitch Proportional
+//6-2
+pitch_I .35 //Pitch integrator
+//6-3
+pitch_min -25 //Pitch limits
+//6-4
+pitch_max  25 
+//6-5
+pitch_Integrator_max 10 //Pitch integrator limits
+//6-6
+pitch_Integrator_min -10
+//6-7
+PITCH_COMP .25 //<------Very important, Pitch compensation vs. Roll bank angle. 
+
+#### ALITITUDE #####
+
+ALTITUDE_ERROR_MAX 2 //  10
+//8-2
+ALTITUDE_ERROR_MIN -10 //
+//8-3
+ ALTITUDE_ERROR_PITCH_PROPORTIONAL 1.5 //Altitude error proportional, pitch setpoint
+//8-4
+ALTITUDE_ERROR_PITCH_MAX 1 // 15 Altitud Hold aircraft pitch limits in degrees, if you add to much you may stall... 
+//8-5
+ALTITUDE_ERROR_PITCH_MIN -14  // -15
+//8-6
+AIRSPEED_CENTRAL 40 // 30 Airspeed  central point in m/s, normal flight... This value is the lowest airspeed that makes your plane flight steady. 
+//8-7
+ALTITUDE_ERROR_AIRSPEED_PROPORTIONAL 3  // 3
+//8-8
+ALTITUDE_ERROR_AIRSPEED_MAX 10  // 30
+//8-9
+ALTITUDE_ERROR_AIRSPEED_MIN -10

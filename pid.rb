@@ -2,7 +2,7 @@
 
 class PID
 
-	def initialize( p = 2.0, i = 0.0, d = 1.0, derivator = 0, integrator = 0, integrator_max = 5, integrator_min = -5)
+	def initialize( label = "Mystery", p = 2.0, i = 0.0, d = 1.0, derivator = 0, integrator = 0, integrator_max = 5, integrator_min = -5)
     #what does Kp, Ki, Kd mean here?
 		@Kp = p
 		@Ki = i
@@ -14,6 +14,8 @@ class PID
 
 		@set_point = 0.0
 		@error = 0.0
+    
+    @label = label
   end
   
 
@@ -23,7 +25,9 @@ class PID
   
 
     @error  =  @set_point - current_value
-
+    
+    puts @label + " ERROR :: %f " % @error
+    
     @P_value  =  @Kp * @error
     @D_value  =  @Kd * ( @error - @Derivator)
     @Derivator  =  @error
@@ -38,7 +42,8 @@ class PID
     @I_value  =  @Integrator * @Ki
 
     pid  =  @P_value + @I_value + @D_value
-
+    
+    puts @label + " :: " + "P %f I %f D %f" % [@P_value, @I_value, @D_value]
     return pid
   end
   
