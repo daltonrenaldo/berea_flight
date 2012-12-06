@@ -32,13 +32,13 @@ class ControlPanel
   
   def initialize
     socket_create()
-    @pid_pitch = PID.new("Pitch", 3,0.25, 0.0, 0, 0, 1, -1)
+    @pid_pitch = PID.new("Pitch", 3,1.25, 0.0, 0, 0, 1, -1)
     @rollpid_ailerons = PID.new("Roll", 3.0,0.04,0)
     # @pid_verticalspeed = PID.new(3.0,0.04,0)
-    # @pid_heading = PID.new("Heading", 0.3, 0.5, 0.0)
+    @pid_heading = PID.new("Heading", 0.05, 0, 0)
     @alt_error = 0
     @previous_alt = 0
-    @desired_alt = 2000
+    @desired_alt = 10000
     setup()
   end
   
@@ -47,7 +47,23 @@ class ControlPanel
     @pid_pitch.setpoint(0)
     @rollpid_ailerons.setpoint(0)
     # @pid_verticalspeed.setpoint(-5)
-    # @pid_heading.setpoint(40)
+    @pid_heading.setpoint(300)
+  end
+  
+  def flipSign()
+    if rand(100) > 50
+      1
+    else
+      -1
+    end
+  end
+  
+  def noise(v, percentC, percentE)
+    if rand(100) < percentC
+      (v * rand(percentE)/100 * flipSign())
+    else
+      0.0
+    end
   end
   
   # updates our control attributes
@@ -107,7 +123,7 @@ class ControlPanel
     # TODO: Pitch needs to incorporate heading
     
     @pid_pitch.setpoint(desired_rate)
-    # control[:rudder] = heading()
+    control[:rudder] = heading()
     
     # We set the elevator to the negative of the pitch 
     # because of the simulator. + pitch make us go down,
@@ -117,6 +133,7 @@ class ControlPanel
     puts "CURRENT CLIMB::" + current_rate.to_s
     puts "DESIRED CLIMB::" + desired_rate.to_s
     puts "Altitude: " + @altitude_ft.to_s
+    puts "Heading: " + @heading_deg.to_s
     
     # saving the current altitude before it updates
     @previous_alt = @altitude_ft
@@ -125,18 +142,23 @@ class ControlPanel
   
   # this function returns the rudder control value from the PID, 
   # we have to do some math first before we call the PID controller.
-  def heading ()
-    setHeading = 180   
-    @pid_heading.setpoint(setHeading)
-    temp = 0
-    temp = @heading_deg + 180 
-    if (temp <= 360)
-      #if waypoint is greater than temp we need to go left.
-      if ( (@heading_deg > temp) and (@heading_deg -180 <= 0) )           
-        return -(@pid_heading.update(@heading_deg))
-      end    
-    end
-    return(@pid_heading.update(@heading_deg))
+  # def heading_old ()
+  #    setHeading = 180   
+  #    @pid_heading.setpoint(setHeading)
+  #    temp = 0
+  #    temp = @heading_deg + 180 
+  #    if (temp <= 360)
+  #      #if waypoint is greater than temp we need to go left.
+  #      if ( (@heading_deg > temp) and (@heading_deg -180 <= 0) )           
+  #        return -(@pid_heading.update(@heading_deg))
+  #      end    
+  #    end
+  #    return(@pid_heading.update(@heading_deg))
+  #  end
+  
+  def heading()
+    @pid_heading.update(@heading_deg)
+    
   end
   
   # Contrain a value between a min and a max
@@ -158,7 +180,7 @@ class ControlPanel
   # based on the current altitude  
   def get_target_climb_rate
     @alt_error = (@desired_alt - @altitude_ft)
-    Math.atan2(@alt_error / 1000.0, 1.0)
+    constrain("climb", Math.atan2(@alt_error / 1000.0, 1.0), -0.08, 0.03)
   end
   
   # Gets the current climb rate
